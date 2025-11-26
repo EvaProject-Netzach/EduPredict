@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card mx-auto" style="max-width: 700px;">
+    <div class="card-body">
+        <h3 class="mb-3">{% if ramo %}Editar Ramo{% else %}Crear Ramo{% endif %}</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label>Nombre del ramo</label>
+                <input type="text" name="nombre" class="form-control" required value="{{ ramo.nombre|default:'' }}">
+            </div>
+
+            <h5>Notas</h5>
+            <div id="notas-container"></div>
+            <button type="button" id="add-nota" class="btn btn-sm btn-primary mb-3">+ Añadir nota</button>
+            
+            <h5>Examen</h5>
+            <div id="examen-container"></div>
+            <button type="button" id="toggle-examen" class="btn btn-sm btn-info mb-3">Añadir examen</button>
+
+            <button class="btn btn-success w-100">{% if ramo %}Guardar cambios{% else %}Crear Ramo{% endif %}</button>
+        </form>
+
+        <a href="/mi-semestre" class="btn btn-link w-100 mt-3">Volver a Mi Semestre</a>
+    </div>
+</div>
+
+<script>
+let notaCount = 0;
+let examenAdded = false;
+
+// Función para añadir una fila de nota
+function agregarNota(notaValue='', porcValue='') {
+    notaCount++;
+    let div = document.createElement("div");
+    div.classList.add("mb-2", "d-flex", "gap-2");
+    div.innerHTML = `
+        <input type="number" step="0.1" name="nota_${notaCount}" placeholder="Nota" class="form-control" style="width:70px;" value="${notaValue}">
+        <input type="number" step="0.1" name="porc_${notaCount}" placeholder="%" class="form-control" style="width:70px;" value="${porcValue}">
+        <button type="button" class="btn btn-danger btn-sm remove-nota">-</button>
+    `;
+    document.getElementById("notas-container").appendChild(div);
+    div.querySelector(".remove-nota").addEventListener("click", function(){
+        div.remove();
+    });
+}
+
+// Botón para añadir nota
+document.getElementById("add-nota").addEventListener("click", function(){
+    agregarNota();
+});
+
+// Botón para añadir/examen
+document.getElementById("toggle-examen").addEventListener("click", function(){
+    let container = document.getElementById("examen-container");
+    if(!examenAdded){
+        container.innerHTML = `
+            <div class="mb-2 d-flex gap-2">
+                <input type="number" step="0.1" name="examen_nota" placeholder="Nota" class="form-control" style="width:70px;">
+                <input type="number" step="0.1" name="examen_porcentaje" placeholder="%" class="form-control" style="width:70px;">
+            </div>
+        `;
+        this.textContent = "Eliminar examen";
+        examenAdded = true;
+    } else {
+        container.innerHTML = "";
+        this.textContent = "Añadir examen";
+        examenAdded = false;
+    }
+});
+
+// Cargar datos si estamos editando
+{% if ramo %}
+    {% for n in ramo.notas %}
+        agregarNota("{{ n.nota|default_if_none:'' }}", "{{ n.porcentaje|default:0 }}");
+    {% endfor %}
+
+    {% if ramo.examen.nota %}
+        examenAdded = true;
+        document.getElementById("examen-container").innerHTML = `
+            <div class="mb-2 d-flex gap-2">
+                <input type="number" step="0.1" name="examen_nota" placeholder="Nota" class="form-control" style="width:70px;" value="{{ ramo.examen.nota }}">
+                <input type="number" step="0.1" name="examen_porcentaje" placeholder="%" class="form-control" style="width:70px;" value="{{ ramo.examen.porcentaje }}">
+            </div>
+        `;
+        document.getElementById("toggle-examen").textContent = "Eliminar examen";
+    {% endif %}
+{% endif %}
+</script>
+
+{% endblock %}

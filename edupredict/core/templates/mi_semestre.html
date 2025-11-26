@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+    <h2>Mi Semestre Actual</h2>
+    <div>
+        <a href="/crear-ramo" class="btn btn-primary">Crear Ramo</a>
+        <a href="/miperfil" class="btn btn-secondary">Volver a Mi Perfil</a>
+    </div>
+</div>
+
+<table class="table table-bordered">
+    <thead class="table-light">
+    <tr>
+        <th>DEFCON</th>
+        <th>Nombre de Ramo</th>
+        <th>Notas</th>
+        <th>Examen</th>
+        <th>Promedio Parcial</th>
+        <th>Promedio Final</th>
+        <th>Acción</th> <!-- Nueva columna -->
+    </tr>
+</thead>
+<tbody>
+    {% for ramo in ramos %}
+    <tr>
+        {% if ramo.defcon == 5 %}
+            <td class="text-white" style="background-color:#4ba3ff;">5</td>
+        {% elif ramo.defcon == 4 %}
+            <td class="text-white" style="background-color:#28a745;">4</td>
+        {% elif ramo.defcon == 3 %}
+            <td class="text-dark" style="background-color:#ffc107;">3</td>
+        {% elif ramo.defcon == 2 %}
+            <td class="text-white" style="background-color:#dc3545;">2</td>
+        {% else %}
+            <td class="text-white" style="background-color:#000000;">1</td>
+        {% endif %}
+
+        <td>{{ ramo.nombre }}</td>
+        <td>
+    {% for n in ramo.notas %}
+        {% if n.nota != None %}
+            <span class="badge bg-primary"> {{ n.nota }} ({{ n.porcentaje }}%) </span>
+        {% else %}
+            <span class="badge bg-warning text-dark"> Pendiente ({{ n.porcentaje }}%) </span>
+        {% endif %}
+    {% endfor %}
+</td>
+        <td>{{ ramo.examen.nota|default:"-" }}</td>
+        <td>{{ ramo.promedio_parcial }}</td>
+        <td>{{ ramo.promedio_final }}</td>
+        <td>
+            <a href="/editar-ramo/{{ ramo.id }}" class="btn btn-sm btn-warning">Editar</a>
+            <a href="/eliminar-ramo/{{ ramo.id }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que quieres eliminar este ramo?');">Eliminar</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="7" class="text-center">No hay ramos agregados</td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+{% endblock %}
