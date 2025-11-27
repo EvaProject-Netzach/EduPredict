@@ -5,6 +5,7 @@
     <h2>Mi Semestre Actual</h2>
     <div>
         <a href="/crear-ramo" class="btn btn-primary">Crear Ramo</a>
+        <a href="/calculadora-sinregistrar" class="btn btn-info btn-lg m-2">Calcula tu promedio</a>
         <a href="/miperfil" class="btn btn-secondary">Volver a Mi Perfil</a>
     </div>
 </div>
@@ -21,9 +22,9 @@
         <th>Acción</th> <!-- Nueva columna -->
     </tr>
 </thead>
-<tbody>
+<tbody> <!-- cuerpo de la tabla un for i in range -->
     {% for ramo in ramos %}
-    <tr>
+    <tr> <!-- DEFCON -->
         {% if ramo.defcon == 5 %}
             <td class="text-white" style="background-color:#4ba3ff;">5</td>
         {% elif ramo.defcon == 4 %}
@@ -45,7 +46,7 @@
             <span class="badge bg-warning text-dark"> Pendiente ({{ n.porcentaje }}%) </span>
         {% endif %}
     {% endfor %}
-</td>
+</td> <!-- APARTADOS DE EXAMEN PROMEDIOS Y PROMEDIOS FINALES -->
         <td>{{ ramo.examen.nota|default:"-" }}</td>
         <td>{{ ramo.promedio_parcial }}</td>
         <td>{{ ramo.promedio_final }}</td>

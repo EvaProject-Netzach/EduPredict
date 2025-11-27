@@ -9,7 +9,7 @@
 
 <div>Ingrese sus notas con coma o decimal...</div>
 
-<!-- TABLA PRINCIPAL -->
+
 <div class="card mb-4">
     <div class="card-body">
         <h4>Notas del curso</h4>
@@ -27,7 +27,7 @@
     </div>
 </div>
 
-<!-- TABLA DE EXAMEN -->
+
 <div class="card mb-4">
     <div class="card-body">
 
@@ -55,7 +55,7 @@
     </div>
 </div>
 
-<!-- RESULTADOS -->
+
 <div class="card mb-4">
     <div class="card-body">
         <h4>Resultados</h4>
@@ -120,7 +120,7 @@ function calcular() {
     let parcialTotal = 0;
     let sumaPorcentaje = 0;
 
-    // Promedio parcial (100% de las notas)
+    // parcial (100% de las notas)
     notas.forEach((n, i) => {
         let nota = parseFloat(n.value) || 0;
         let p = parseFloat(porcentajes[i].value) || 0;
@@ -130,18 +130,18 @@ function calcular() {
 
     document.getElementById("promedio").textContent = parcialTotal.toFixed(2);
 
-    // Promedio final (considerando examen)
+    // final (considerando examen)
     let examenActivo = document.getElementById("examenContainer").style.display !== "none";
 
     if (!examenActivo) {
-        // No hay examen, el final = parcial
+        // no hay examen, el final = parcial
         document.getElementById("promedioFinal").textContent = parcialTotal.toFixed(2);
     } else {
-        // Hay examen
+        // hay examen
         let notaEx = parseFloat(document.getElementById("examenNota").value) || 0;
         let porcEx = parseFloat(document.getElementById("examenPorcentaje").value) || 0;
 
-        // Porcentaje de notas normales en el final
+        // notas normales en el final en %
         let porcNotas = 100 - porcEx;
 
         let final = parcialTotal * (porcNotas / 100) + notaEx * (porcEx / 100);

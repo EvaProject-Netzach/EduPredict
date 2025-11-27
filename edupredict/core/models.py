@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# DEFINE la mayoria LO DE LOS RAMOS, OSEA promedios, calculos de formulas y weas
 class Ramo(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=100)
@@ -31,7 +32,7 @@ class Ramo(models.Model):
             final = parcial
         return round(final, 2)
 
-    @property
+    @property # DEFINIR SISTEMA DE ALERTAS DEFCON
     def defcon(self):
         notas = self.notas
         examen_nota = self.examen.get("nota")
@@ -52,7 +53,7 @@ class Ramo(models.Model):
                 final = parcial
             return round(final, 2)
 
-        # DEFCON 5: completado y promedio final >=3.95
+        # DEFCON 5: completado y promedio final mayor o igual a 3.95
         if faltantes == 0 and (examen_nota is not None or examen_porc == 0) and self.promedio_final >= 3.95:
             return 5
 
@@ -60,20 +61,20 @@ class Ramo(models.Model):
         if faltantes == 0 and self.promedio_final < 3.95:
             return 1
 
-        # Si faltan notas
+        # si faltan notas
         if faltantes >= 1:
             peor_caso = promedio_simulado(1.0)
 
-            # DEFCON 4: parcialmente completado, con 1.0 aún apruebas ≥3.95
+            # DEFCON 4: parcialmente completado, con 1.0 aun apruebas con mas de 3.95
             if peor_caso >= 3.95:
                 return 4
 
-            # DEFCON 3: faltan ≥2 notas o la última nota pendiente requiere entre 1.1 y 4.94
+            # DEFCON 3: faltan 2 notas o la última nota pendiente requiere entre 1.1 y 4.94
             if faltantes >= 2:
                 return 3
 
             if faltantes == 1:
-                # Calculamos nota mínima necesaria para aprobar ≥3.95
+                # Calculamos nota minima necesaria para aprobar osea SOBRE 3.95 NO 4.0
                 nota_necesaria = 3.95 * 100 / notas[-1]["porcentaje"]  # aproximación simple
                 if nota_necesaria <= 4.94:
                     return 3
@@ -82,7 +83,7 @@ class Ramo(models.Model):
                 else:
                     return 1
 
-        # Por defecto
+        # Por default
         return 1
 
     def __str__(self):

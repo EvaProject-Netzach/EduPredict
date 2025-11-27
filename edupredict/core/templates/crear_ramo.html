@@ -27,11 +27,11 @@
     </div>
 </div>
 
-<script>
-let notaCount = 0;
+<script> // SCRIPT EN JAVASCRIPT, NO HTML, SIVE PARA HACER LESERAS
+let notaCount = 0; // el contador de notas
 let examenAdded = false;
 
-// Función para añadir una fila de nota
+// para añadir una fila de nota
 function agregarNota(notaValue='', porcValue='') {
     notaCount++;
     let div = document.createElement("div");
@@ -47,12 +47,12 @@ function agregarNota(notaValue='', porcValue='') {
     });
 }
 
-// Botón para añadir nota
+// Boton añadir nota
 document.getElementById("add-nota").addEventListener("click", function(){
     agregarNota();
 });
 
-// Botón para añadir/examen
+// boton añadir/examen algo similar a lo de la calculadora pero para registro
 document.getElementById("toggle-examen").addEventListener("click", function(){
     let container = document.getElementById("examen-container");
     if(!examenAdded){
@@ -71,7 +71,7 @@ document.getElementById("toggle-examen").addEventListener("click", function(){
     }
 });
 
-// Cargar datos si estamos editando
+// cargr los ddatos si estamos editando
 {% if ramo %}
     {% for n in ramo.notas %}
         agregarNota("{{ n.nota|default_if_none:'' }}", "{{ n.porcentaje|default:0 }}");
