@@ -1,0 +1,17 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}
+    Inicio: {{ user.username }}
+{% endblock %}
+
+{% block contenido %}
+    <div class="mb-5">
+        {% if user.is_authenticated %}
+            <div class="alert alert-info col-8 offset-md-2" role="alert">
+                <h2 class="text-center">Bienvenido a tu Espacio Académico 😉: {{ user.username }}</h2>
+            </div>    
+        {% else %}
+        {% endif %} 
+    </div>
+    
+{% endblock %}
