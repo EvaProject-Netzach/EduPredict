@@ -1,6 +1,6 @@
 <!-- Sidebar -->
- {% load static %}
-<ul class="navbar-nav bg-gradient-secondary sidebar sidebar-dark accordion" id="accordionSidebar">
+{% load static %}
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
     
     {% if user.is_authenticated %}
@@ -61,7 +61,9 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Ver...</h6>
                 <a class="collapse-item" href="/mi_semestre/">Mi semestre</a>
-                <a class="collapse-item" href="/estados/">Estádisticas</a>
+                <a class="collapse-item" href="/estadisticas/">Estadísticas</a>
+                <h6 class="collapse-header">Filtrar...</h6>
+                <a class="collapse-item" href="/filtrar_ramos/">Ramos</a>
                 <h6 class="collapse-header">Registrar...</h6>
                 <a class="collapse-item" href="/crear_ramo/">Ramo</a>
             </div>
@@ -70,31 +72,43 @@
 
   
         {% else %}
-        <!-- Nav Item - Pages Collapse Menu -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-            aria-expanded="true" aria-controls="collapseTwo">
-            <i class="fas fa-fw fa-cog"></i>
-            <span>Iniciar como Admin</span>
-        </a>
-        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Ir a Admin...</h6>
-                <a class="collapse-item" href="/admin">Admin</a>
+        <!-- Nav Item - Pages Collapse Menu (Para usuarios no autenticados) -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
+                aria-expanded="true" aria-controls="collapseTwo">
+                <i class="fas fa-fw fa-cog"></i>
+                <span>Iniciar como Admin</span>
+            </a>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">Ir a Admin...</h6>
+                    <a class="collapse-item" href="/admin">Admin</a>
+                </div>
             </div>
-        </div>
-    </li>
+        </li>
         {% endif %} 
+
+        <!-- Mostrar la opción de Admin también para superusuarios autenticados -->
+        {% if user.is_authenticated and user.is_superuser %}
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+        
+        <!-- Nav Item - Admin Menu (Para superusuarios autenticados) -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAdmin"
+                aria-expanded="true" aria-controls="collapseAdmin">
+                <i class="fas fa-fw fa-cog"></i>
+                <span>Administración</span>
+            </a>
+            <div id="collapseAdmin" class="collapse" aria-labelledby="headingAdmin" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">Panel de Administración</h6>
+                    <a class="collapse-item" href="/admin">Ir al Admin</a>
+                </div>
+            </div>
+        </li>
+        {% endif %}
     </div>
-
-
-
-
-
-
-    
-
-    
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

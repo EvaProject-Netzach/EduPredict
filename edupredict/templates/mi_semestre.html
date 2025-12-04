@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 
 {% block titulo %}
-    Inicio: {{ user.username }}
+        Semestres: {{ user.username }}
 {% endblock %}
 
 {% block contenido %}
@@ -15,12 +15,50 @@
         </h2>
     </div>
 
-    <!-- Botón para crear semestres -->
+    <!-- Mensajes de Django -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Formulario para crear semestres (SIN MODAL - BOOTSTRAP 5) -->
     {% if not semestres %}
-    <div class="text-center mb-4">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSemestres">
-            Crear Semestres
-        </button>
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="mb-0">Crear Semestres</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'crear-semestres' %}" id="formCrearSemestres">
+                        {% csrf_token %}
+                        <div class="mb-3 text-center">
+                            <label for="cantidad_semestres" class="form-label">¿Cuántos semestres tiene tu carrera?</label>
+                            <select name="cantidad_semestres" id="cantidad_semestres" class="form-select" required>
+                                <option class="text-center" value="">Selecciona cantidad</option>
+                                <option value="1">1 semestre</option>
+                                <option value="2">2 semestres</option>
+                                <option value="3">3 semestres</option>
+                                <option value="4">4 semestres</option>
+                                <option value="5">5 semestres</option>
+                                <option value="6">6 semestres</option>
+                                <option value="7">7 semestres</option>
+                                <option value="8">8 semestres</option>
+                                <option value="9">9 semestres</option>
+                                <option value="10">10 semestres</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-plus-circle"></i> Crear Semestres
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
     {% endif %}
 
@@ -40,99 +78,92 @@
 
     <!-- Tabla de ramos -->
     {% if semestre_actual %}
-    <table class="table table-bordered">
-        <thead class="table-light">
-        <tr>
-            <th>DEFCON</th>
-            <th>Nombre de Ramo</th>
-            <th>Notas</th>
-            <th>Examen</th>
-            <th>Promedio Parcial</th>
-            <th>Promedio Final</th>
-            <th>Acción</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for ramo in ramos %}
-        <tr>
-            {% if ramo.defcon == 5 %}
-                <td class="text-white" style="background-color:#4ba3ff;">5</td>
-            {% elif ramo.defcon == 4 %}
-                <td class="text-white" style="background-color:#28a745;">4</td>
-            {% elif ramo.defcon == 3 %}
-                <td class="text-dark" style="background-color:#ffc107;">3</td>
-            {% elif ramo.defcon == 2 %}
-                <td class="text-white" style="background-color:#dc3545;">2</td>
-            {% else %}
-                <td class="text-white" style="background-color:#000000;">1</td>
-            {% endif %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr class="text-center">
+                    <th>DEFCON</th>
+                    <th>Nombre de Ramo</th>
+                    <th>Notas</th>
+                    <th>Examen</th>
+                    <th>Promedio<br>Parcial</th>
+                    <th>Promedio<br>Final</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ramo in ramos %}
+                <tr>
+                    {% if ramo.defcon == 5 %}
+                        <td class="text-white text-center fw-bold align-middle" style="background-color:#4ba3ff;">5</td>
+                    {% elif ramo.defcon == 4 %}
+                        <td class="text-white text-center fw-bold align-middle" style="background-color:#28a745;">4</td>
+                    {% elif ramo.defcon == 3 %}
+                        <td class="text-dark text-center fw-bold align-middle" style="background-color:#ffc107;">3</td>
+                    {% elif ramo.defcon == 2 %}
+                        <td class="text-white text-center fw-bold align-middle" style="background-color:#dc3545;">2</td>
+                    {% else %}
+                        <td class="text-white text-center fw-bold align-middle" style="background-color:#000000;">1</td>
+                    {% endif %}
 
-            <td>{{ ramo.nombre }}</td>
-            <td>
-        {% for n in ramo.notas %}
-            {% if n.nota != None and n.nota != 0.0 %}
-                <span class="badge bg-primary"> {{ n.nota }} ({{ n.porcentaje }}%) </span>
-            {% else %}
-                <span class="badge bg-warning text-dark"> Pendiente ({{ n.porcentaje }}%) </span>
-            {% endif %}
-        {% endfor %}
-    </td>
-            <td>
-                {% if ramo.examen.nota != None and ramo.examen.nota != 0.0 %}
-                    {{ ramo.examen.nota }} ({{ ramo.examen.porcentaje }}%)
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-            <td>{{ ramo.promedio_parcial }}</td>
-            <td>{{ ramo.promedio_final }}</td>
-            <td>
-                <a href="{% url 'editar-ramo' ramo.id %}" class="btn btn-sm btn-warning">Editar</a>
-                <a href="{% url 'eliminar-ramo' ramo.id %}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que quieres eliminar este ramo?');">Eliminar</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="7" class="text-center">No hay ramos en este semestre</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-    </table>
+                    <td class="align-middle">{{ ramo.nombre }}</td>
+                    <td class="align-middle">
+                        {% for n in ramo.notas %}
+                            {% if n.nota != None and n.nota != 0.0 %}
+                                <span class="badge bg-primary me-1 mb-1">{{ n.nota|floatformat:2 }} ({{ n.porcentaje|floatformat:0 }}%)</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark me-1 mb-1">Pendiente ({{ n.porcentaje|floatformat:0 }}%)</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td class="text-center align-middle">
+                        {% if ramo.examen.nota != None and ramo.examen.nota != 0.0 %}
+                            {{ ramo.examen.nota|floatformat:2 }}<br>({{ ramo.examen.porcentaje|floatformat:0 }}%)
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="text-center fw-bold align-middle">{{ ramo.promedio_parcial_display }}</td>
+                    <td class="text-center fw-bold align-middle">{{ ramo.promedio_final_display }}</td>
+                    <td class="text-center align-middle">
+                        <a href="{% url 'editar-ramo' ramo.id %}" class="btn btn-sm btn-warning mb-1">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'eliminar-ramo' ramo.id %}" class="btn btn-sm btn-danger mb-1" onclick="return confirm('¿Seguro que quieres eliminar este ramo?');">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No hay ramos en este semestre</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% elif semestres %}
     <div class="alert alert-info text-center">
-        Selecciona un semestre para ver los ramos
+        <i class="fas fa-info-circle"></i> Selecciona un semestre para ver los ramos
     </div>
     {% else %}
-    <div class="alert alert-warning text-center">
-        No hay semestres creados. Haz clic en "Crear Semestres" para comenzar.
+    <div class="alert alert-warning text-center w-50 mx-auto">
+        <i class="fas fa-exclamation-triangle"></i> Crea semestres usando el formulario de arriba para comenzar.
     </div>
     {% endif %}
+{% endblock %}
 
-    <!-- Modal para crear semestres -->
-    <div class="modal fade" id="modalSemestres" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Crear Semestres</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="POST" action="{% url 'crear-semestres' %}">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <p>¿Cuántos semestres tiene tu carrera?</p>
-                        <select name="cantidad_semestres" class="form-control" required>
-                            <option value="">Selecciona cantidad</option>
-                            {% for i in "12345678" %}
-                                <option value="{{ forloop.counter }}">{{ forloop.counter }} semestre{{ forloop.counter|pluralize }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Crear Semestres</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+{% block extra_js %}
+<script>
+    // Debug para verificar que el formulario funciona
+    document.getElementById('formCrearSemestres')?.addEventListener('submit', function(e) {
+        const cantidad = document.getElementById('cantidad_semestres').value;
+        if (!cantidad) {
+            e.preventDefault();
+            alert('Por favor selecciona una cantidad de semestres');
+            return false;
+        }
+        console.log('Formulario enviado con cantidad:', cantidad);
+    });
+</script>
 {% endblock %}

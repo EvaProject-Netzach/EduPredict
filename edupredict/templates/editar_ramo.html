@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 
 {% block titulo %}
-    Inicio: {{ user.username }}
+    Editar Ramo: {{ user.username }}
 {% endblock %}
 
 {% block contenido %}
@@ -39,16 +39,21 @@
 let notasData = {{ ramo.notas|safe }};
 let examenData = {{ ramo.examen|safe }};
 let notaCount = 0;
-let examenAdded = examenData && Object.keys(examenData).length > 0 && examenData.nota !== null;
+let examenAdded = examenData && Object.keys(examenData).length > 0;
 
 // Función para añadir nota
 function agregarNota(nota_val="", porc_val="") { 
     notaCount++;
     let div = document.createElement("div");
     div.classList.add("mb-2", "d-flex", "gap-2", "justify-content-center");
+    
+    // Si viene vacío, dejar el campo vacío; si es 0, mostrar 0
+    let notaValue = nota_val === "" ? "" : nota_val;
+    let porcValue = porc_val === "" ? "" : porc_val;
+    
     div.innerHTML = `
-        <input type="number" step="0.1" name="nota_${notaCount}" placeholder="Nota" class="form-control" style="width:110px;" value="${nota_val}">
-        <input type="number" step="0.1" name="porc_${notaCount}" placeholder="%" class="form-control" style="width:110px;" value="${porc_val}">
+        <input type="number" step="0.1" min="0" max="7" name="nota_${notaCount}" placeholder="Nota" class="form-control" style="width:110px;" value="${notaValue}">
+        <input type="number" step="0.1" min="0" max="100" name="porc_${notaCount}" placeholder="%" class="form-control" style="width:110px;" value="${porcValue}">
         <button type="button" class="btn btn-danger btn-sm remove-nota">-</button>
     `;
     document.getElementById("notas-container").appendChild(div);
@@ -61,15 +66,15 @@ function agregarNota(nota_val="", porc_val="") {
 // Cargar notas existentes
 if (notasData && notasData.length > 0) {
     notasData.forEach(n => {
-        let nota_val = n.nota !== null && n.nota !== undefined ? n.nota : "0";
-        let porc_val = n.porcentaje !== null && n.porcentaje !== undefined ? n.porcentaje : "0";
+        let nota_val = (n.nota !== null && n.nota !== undefined) ? n.nota : "";
+        let porc_val = (n.porcentaje !== null && n.porcentaje !== undefined) ? n.porcentaje : "";
         agregarNota(nota_val, porc_val);
     });
 }
 
-// Añadir nota
+// Añadir nota vacía
 document.getElementById("add-nota").addEventListener("click", function(){
-    agregarNota();
+    agregarNota("", "");
 });
 
 // Manejar examen
@@ -77,10 +82,13 @@ let examenContainer = document.getElementById("examen-container");
 let toggleBtn = document.getElementById("toggle-examen");
 
 if (examenAdded) {
+    let notaExamen = (examenData.nota !== null && examenData.nota !== undefined) ? examenData.nota : "";
+    let porcExamen = (examenData.porcentaje !== null && examenData.porcentaje !== undefined) ? examenData.porcentaje : "";
+    
     examenContainer.innerHTML = `
         <div class="mb-2 d-flex gap-2 justify-content-center">
-            <input type="number" step="0.1" name="examen_nota" placeholder="Nota" class="form-control" style="width:110px;" value="${examenData.nota || '0'}">
-            <input type="number" step="0.1" name="examen_porcentaje" placeholder="%" class="form-control" style="width:110px;" value="${examenData.porcentaje || '0'}">
+            <input type="number" step="0.1" min="0" max="7" name="examen_nota" placeholder="Nota" class="form-control" style="width:110px;" value="${notaExamen}">
+            <input type="number" step="0.1" min="0" max="100" name="examen_porcentaje" placeholder="%" class="form-control" style="width:110px;" value="${porcExamen}">
         </div>
     `;
     toggleBtn.textContent = "Eliminar examen";
@@ -90,8 +98,8 @@ toggleBtn.addEventListener("click", function(){
     if(!examenAdded){
         examenContainer.innerHTML = `
             <div class="mb-2 d-flex gap-2 justify-content-center">
-                <input type="number" step="0.1" name="examen_nota" placeholder="Nota" class="form-control" style="width:110px;" value="0">
-                <input type="number" step="0.1" name="examen_porcentaje" placeholder="%" class="form-control" style="width:110px;" value="0">
+                <input type="number" step="0.1" min="0" max="7" name="examen_nota" placeholder="Nota" class="form-control" style="width:110px;" value="">
+                <input type="number" step="0.1" min="0" max="100" name="examen_porcentaje" placeholder="%" class="form-control" style="width:110px;" value="">
             </div>
         `;
         this.textContent = "Eliminar examen";
@@ -105,7 +113,7 @@ toggleBtn.addEventListener("click", function(){
 
 // Si no hay notas, agregar una vacía por defecto
 if (!notasData || notasData.length === 0) {
-    agregarNota();
+    agregarNota("", "");
 }
 </script>
 

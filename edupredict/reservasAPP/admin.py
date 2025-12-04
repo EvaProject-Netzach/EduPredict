@@ -1,14 +1,25 @@
 from django.contrib import admin
-
 from reservasAPP.models import *
 
 # Register your models here.
 
-class ReservaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nombre', 'telefono', 'fecha', 'hora', 'cantidad', 'estado', 'observacion')
-admin.site.register(Reserva, ReservaAdmin)
+class ComentarioAdmin(admin.ModelAdmin):
+    list_display = ('id', 'nombre', 'email', 'telefono', 'mensaje', 'fecha_creacion')
+    list_filter = ('fecha_creacion',)
+    search_fields = ('nombre', 'email', 'telefono', 'mensaje')
+    readonly_fields = ('fecha_creacion',)
+    ordering = ('-fecha_creacion',)
+    
+    fieldsets = (
+        ('Información del Usuario', {
+            'fields': ('nombre', 'email', 'telefono')
+        }),
+        ('Comentario', {
+            'fields': ('mensaje',)
+        }),
+        ('Fecha', {
+            'fields': ('fecha_creacion',)
+        }),
+    )
 
-
-class EstadoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'estado')
-admin.site.register(Estado, EstadoAdmin)
+admin.site.register(Comentario, ComentarioAdmin)

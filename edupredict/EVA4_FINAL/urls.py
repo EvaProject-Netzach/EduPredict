@@ -28,10 +28,12 @@ urlpatterns = [
     path("calculadora_sin_registro/", TemplateView.as_view(template_name="calculadora_sin_registro.html"), name="calculoRapido"),
     path("crear_ramo/", crear_ramo, name="crearRamo"),
     path("mi_semestre/", mi_semestre, name="miSemestre"),
+    path("estadisticas/", estadisticas, name="estadisticas"),
+    path("filtrar_ramos/", filtrar_ramos, name="filtrarRamos"),
     path("crear-semestres/", crear_semestres, name="crear-semestres"),
     path("editar-ramo/<int:ramo_id>/", editar_ramo, name="editar-ramo"),
     path("eliminar-ramo/<int:ramo_id>/", eliminar_ramo, name="eliminar-ramo"),
-
+    path("enviar-comentario/", enviar_comentario, name="enviar-comentario"),
 
     path('reservas/', reservasData, name='reservas'),
     path('registroReservas', registroReservas, name="registroReservas"),

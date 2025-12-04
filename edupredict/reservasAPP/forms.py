@@ -1,5 +1,5 @@
 from django import forms
-from reservasAPP.models import Estado, Reserva
+from reservasAPP.models import Estado, Reserva, Comentario
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .models import Ramo, Semestre
 
@@ -28,6 +28,50 @@ class NotaForm(forms.Form): # notas
     porcentaje = forms.FloatField(label="Porcentaje")
     es_examen = forms.BooleanField(required=False)
 
+
+class ComentarioForm(forms.ModelForm):
+    nombre = forms.CharField(
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nombre *'
+        })
+    )
+    
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Email *'
+        })
+    )
+    
+    telefono = forms.CharField(
+        max_length=20,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Teléfono *',
+            'pattern': r'^\+?\d{8,13}$'
+        }),
+        help_text='Formato: +56949079105, 949079105 o 49079105'
+    )
+    
+    mensaje = forms.CharField(
+        required=True,
+        max_length=200,  # LÍMITE DE 200 CARACTERES
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Tu comentario (máximo 200 caracteres) *',
+            'rows': 5,
+            'maxlength': '200'  # Limita en el HTML también
+        })
+    )
+    
+    class Meta:
+        model = Comentario
+        fields = ['nombre', 'email', 'telefono', 'mensaje']
 
 
 class ReservaForm(forms.ModelForm):

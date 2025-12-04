@@ -1,0 +1,132 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}
+    Filtrar Ramos: {{ user.username }}
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Título Principal -->
+            <div class="text-center mb-4">
+                <h2 class="text-white">
+                    <i class="bi bi-funnel-fill me-2"></i>Filtrar Ramos por Rendimiento
+                </h2>
+                <p class="text-white-50">Selecciona un rango de notas para ver tus ramos organizados por semestre</p>
+            </div>
+
+            <!-- Card del Buscador -->
+            <div class="card shadow-lg mb-4 border-0">
+                <div class="card-body p-4">
+                    <div class="text-center">
+                        <!-- Botón de Búsqueda (Lupa) -->
+                        <button class="btn btn-primary btn-lg mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#rangosCollapse" aria-expanded="false" aria-controls="rangosCollapse">
+                            <i class="bi bi-search fs-4"></i>
+                            <span class="ms-2">Buscar por Rango de Notas</span>
+                        </button>
+
+                        <!-- Menú Desplegable de Rangos -->
+                        <div class="collapse" id="rangosCollapse">
+                            <div class="card card-body bg-light mt-3">
+                                <h5 class="mb-3 text-secondary">Selecciona un Rango:</h5>
+                                <div class="d-grid gap-2 col-md-8 mx-auto">
+                                    <a href="?rango=reprobados" class="btn btn-danger btn-lg">
+                                        <i class="bi bi-x-circle me-2"></i>Reprobados (0.0 - 3.9)
+                                    </a>
+                                    <a href="?rango=aprobados_bajos" class="btn btn-warning btn-lg">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>Aprobados Bajos (4.0 - 4.9)
+                                    </a>
+                                    <a href="?rango=aprobados_medios" class="btn btn-info btn-lg">
+                                        <i class="bi bi-check-circle me-2"></i>Aprobados Medios (5.0 - 6.9)
+                                    </a>
+                                    <a href="?rango=excelencia" class="btn btn-success btn-lg">
+                                        <i class="bi bi-star-fill me-2"></i>Excelencia (7.0)
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados de la Búsqueda -->
+            {% if nombre_rango %}
+            <div class="card shadow-lg border-0">
+                <div class="card-header py-3 
+                    {% if rango_seleccionado == 'reprobados' %}bg-danger
+                    {% elif rango_seleccionado == 'aprobados_bajos' %}bg-warning
+                    {% elif rango_seleccionado == 'aprobados_medios' %}bg-info
+                    {% elif rango_seleccionado == 'excelencia' %}bg-success
+                    {% endif %}">
+                    <h4 class="m-0 font-weight-bold text-white text-center">
+                        <i class="bi bi-clipboard-data me-2"></i>{{ nombre_rango }}
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    {% if ramos_filtrados %}
+                        {% for semestre, ramos in ramos_filtrados.items %}
+                        <div class="mb-4">
+                            <!-- Título del Semestre -->
+                            <div class="alert alert-primary d-flex align-items-center" role="alert">
+                                <i class="bi bi-calendar3 fs-4 me-3"></i>
+                                <h5 class="mb-0">{{ semestre.nombre }}</h5>
+                            </div>
+
+                            <!-- Lista de Ramos -->
+                            <ul class="list-group list-group-flush">
+                                {% for ramo in ramos %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="bi bi-book me-2 text-primary"></i>{{ ramo.nombre }}
+                                        </h6>
+                                        <small class="text-muted">
+                                            Promedio Parcial: {{ ramo.promedio_parcial_display }}
+                                        </small>
+                                    </div>
+                                    <span class="badge 
+                                        {% if ramo.promedio_final < 4.0 %}bg-danger
+                                        {% elif ramo.promedio_final < 5.0 %}bg-warning text-dark
+                                        {% elif ramo.promedio_final < 7.0 %}bg-info
+                                        {% else %}bg-success
+                                        {% endif %} 
+                                        rounded-pill fs-6 px-3 py-2">
+                                        {{ ramo.promedio_final_display }}
+                                    </span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Sin Resultados -->
+                        <div class="alert alert-warning text-center" role="alert">
+                            <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+                            <h5>No se encontraron ramos en este rango</h5>
+                            <p class="mb-0">No tienes ramos con promedios en el rango seleccionado.</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Botón para Nueva Búsqueda -->
+                    <div class="text-center mt-4">
+                        <a href="{% url 'filtrarRamos' %}" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Limpiar Búsqueda
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Mensaje Inicial -->
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-search text-muted" style="font-size: 5rem;"></i>
+                    <h4 class="text-muted mt-3">Selecciona un rango de notas para comenzar</h4>
+                    <p class="text-muted">Haz clic en el botón de búsqueda arriba y elige el rango que deseas filtrar</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

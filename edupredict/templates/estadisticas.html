@@ -1,0 +1,389 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}
+    Estadísticas: {{ user.username }}
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4 text-white text-center">Estadísticas Comparativas</h1>
+    
+    {% if error %}
+    <div class="alert alert-warning mt-4 text-center w-50 mx-auto">
+        <h4 class="alert-heading">No hay suficientes datos</h4>
+        <p>{{ error }}</p>
+        <hr>
+        <p class="mb-0">Ve a <a href="{% url 'miSemestre' %}">Mi Semestre</a> y agrega ramos en al menos 2 semestres diferentes.</p>
+    </div>
+    {% else %}
+    
+    <!-- Selectores de semestres -->
+    <div class="card mb-4 col-md-6 mx-auto">
+        <div class="card-header text-center">
+            <i class="fas fa-chart-line me-1"></i>
+            Seleccionar Semestres para Comparar
+        </div>
+        <div class="card-body">
+            <form method="GET" id="comparacionForm">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="semestre1" class="form-label">Primer Semestre</label>
+                        <select class="form-control" id="semestre1" name="semestre1" onchange="actualizarOpciones()">
+                            <option value="">Seleccione un Semestre</option>
+                            {% for semestre in semestres_con_ramos %}
+                                <option value="{{ semestre.id }}" {% if semestre1 and semestre.id == semestre1.id %}selected{% endif %}>
+                                    {{ semestre.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 text-center align-self-center">
+                        <h4 class="mt-3">VS</h4>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="semestre2" class="form-label">Segundo Semestre</label>
+                        <select class="form-control" id="semestre2" name="semestre2" onchange="actualizarOpciones()">
+                            <option value="">Seleccione un Semestre</option>
+                            {% for semestre in semestres_con_ramos %}
+                                <option value="{{ semestre.id }}" {% if semestre2 and semestre.id == semestre2.id %}selected{% endif %}>
+                                    {{ semestre.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <button type="submit" class="btn btn-primary">Comparar Semestres</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if semestre1 and semestre2 %}
+    <!-- Gráfico de comparación -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-chart-area me-1"></i>
+            {{ semestre1.nombre }} VS {{ semestre2.nombre }}
+        </div>
+        <div class="card-body" style="position: relative; height: 500px;">
+            <canvas id="myAreaChart"></canvas>
+        </div>
+        <div class="card-footer small text-muted">
+            Comparación de promedios por ramo - Actualizado {% now "SHORT_DATETIME_FORMAT" %}
+        </div>
+    </div>
+
+    <!-- Leyenda del gráfico -->
+<div class="row mb-4 justify-content-center">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body py-2">
+                <i class="fas fa-circle me-1" style="color: rgba(2,117,216,1)"></i>
+                <strong>{{ semestre1.nombre }}</strong> - Promedio General: 
+                <strong>{{ promedio_general1|floatformat:2 }}</strong>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body py-2">
+                <i class="fas fa-circle me-1" style="color: rgba(255,193,7,1)"></i>
+                <strong>{{ semestre2.nombre }}</strong> - Promedio General: 
+                <strong>{{ promedio_general2|floatformat:2 }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Tabla de datos -->
+    <div class="card mb-4 col-md-6 mx-auto">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Datos de Comparación
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-primary">{{ semestre1.nombre }}</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Ramo</th>
+                                    <th>Promedio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ramo in ramos_semestre1 %}
+                                <tr>
+                                    <td>{{ ramo.nombre }}</td>
+                                    <td>{{ ramo.promedio_final_display }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-warning">{{ semestre2.nombre }}</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Ramo</th>
+                                    <th>Promedio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ramo in ramos_semestre2 %}
+                                <tr>
+                                    <td>{{ ramo.nombre }}</td>
+                                    <td>{{ ramo.promedio_final_display }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if semestre1 and semestre2 %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script>
+// Función para redondear correctamente a 1 decimal
+function redondearUnDecimal(valor) {
+    return Math.round(valor * 10) / 10;
+}
+
+// Arrays para almacenar los datos
+var nombresRamos1 = [];
+var promedios1 = [];
+var nombresRamos2 = [];
+var promedios2 = [];
+
+console.log("=== CARGANDO DATOS DEL TEMPLATE ===");
+
+// Llenar datos semestre 1 - Redondear a 1 decimal para el gráfico
+{% for ramo in ramos_semestre1 %}
+nombresRamos1.push("{{ ramo.nombre|escapejs }}");
+var valorOriginal1 = parseFloat("{{ ramo.promedio_final|stringformat:'f' }}");
+var valorRedondeado1 = redondearUnDecimal(valorOriginal1);
+promedios1.push(valorRedondeado1);
+console.log("S1 - {{ ramo.nombre|escapejs }}: Original=" + valorOriginal1 + ", Redondeado=" + valorRedondeado1);
+{% endfor %}
+
+// Llenar datos semestre 2 - Redondear a 1 decimal para el gráfico
+{% for ramo in ramos_semestre2 %}
+nombresRamos2.push("{{ ramo.nombre|escapejs }}");
+var valorOriginal2 = parseFloat("{{ ramo.promedio_final|stringformat:'f' }}");
+var valorRedondeado2 = redondearUnDecimal(valorOriginal2);
+promedios2.push(valorRedondeado2);
+console.log("S2 - {{ ramo.nombre|escapejs }}: Original=" + valorOriginal2 + ", Redondeado=" + valorRedondeado2);
+{% endfor %}
+
+console.log("=== ARRAYS FINALES ===");
+console.log("Nombres S1:", nombresRamos1);
+console.log("Promedios S1:", promedios1);
+console.log("Nombres S2:", nombresRamos2);
+console.log("Promedios S2:", promedios2);
+
+// Función para inicializar el gráfico
+function inicializarGraficoComparacion() {
+    var ctx = document.getElementById("myAreaChart");
+    if (!ctx) {
+        console.error("No se encontró el elemento canvas para el gráfico");
+        return;
+    }
+    
+    // Verificar que hay datos
+    if (promedios1.length === 0 && promedios2.length === 0) {
+        console.error("No hay datos para mostrar en el gráfico");
+        ctx.parentElement.innerHTML = '<div class="alert alert-warning">No hay datos suficientes para mostrar el gráfico</div>';
+        return;
+    }
+    
+    // Usar índices numéricos como posiciones en el eje X
+    var maxRamos = Math.max(nombresRamos1.length, nombresRamos2.length);
+    var labelsPosiciones = [];
+    
+    for (var i = 0; i < maxRamos; i++) {
+        labelsPosiciones.push(i + 1);
+    }
+    
+    console.log("=== CREANDO GRÁFICO ===");
+    
+    // Crear el gráfico con los datos correctos
+    var myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labelsPosiciones,
+            datasets: [{
+                label: "{{ semestre1.nombre|escapejs }}",
+                lineTension: 0,
+                backgroundColor: "rgba(2,117,216,0.2)",
+                borderColor: "rgba(2,117,216,1)",
+                pointRadius: 5,
+                pointBackgroundColor: "rgba(2,117,216,1)",
+                pointBorderColor: "rgba(255,255,255,0.8)",
+                pointHoverRadius: 7,
+                pointHoverBackgroundColor: "rgba(2,117,216,1)",
+                pointHitRadius: 50,
+                pointBorderWidth: 2,
+                data: promedios1,
+                spanGaps: false
+            },
+            {
+                label: "{{ semestre2.nombre|escapejs }}",
+                lineTension: 0,
+                backgroundColor: "rgba(255,193,7,0.2)",
+                borderColor: "rgba(255,193,7,1)",
+                pointRadius: 5,
+                pointBackgroundColor: "rgba(255,193,7,1)",
+                pointBorderColor: "rgba(255,255,255,0.8)",
+                pointHoverRadius: 7,
+                pointHoverBackgroundColor: "rgba(255,193,7,1)",
+                pointHitRadius: 50,
+                pointBorderWidth: 2,
+                data: promedios2,
+                spanGaps: false
+            }],
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: 'category',
+                    gridLines: {
+                        display: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 10,
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0.0,
+                        max: 7.0,
+                        stepSize: 0.1,
+                        callback: function(value, index, values) {
+                            // Mostrar 0.0 y luego cada 0.5 (0.0, 0.5, 1.0, 1.5, 2.0, 2.5...)
+                            if (value === 0) {
+                                return '0.0';
+                            }
+                            var remainder = (value * 10) % 5;
+                            if (remainder === 0) {
+                                return value.toFixed(1);
+                            }
+                            return '';
+                        }
+                    },
+                    gridLines: {
+                        color: "rgba(0, 0, 0, .125)",
+                    }
+                }],
+            },
+            legend: {
+                display: true,
+                position: 'top',
+            },
+            tooltips: {
+                enabled: true,
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var datasetIndex = tooltipItem.datasetIndex;
+                        var index = tooltipItem.index;
+                        var datasetLabel = data.datasets[datasetIndex].label || '';
+                        
+                        var valorMostrar;
+                        var ramoName;
+                        
+                        if (datasetIndex === 0 && index < promedios1.length) {
+                            ramoName = nombresRamos1[index];
+                            valorMostrar = promedios1[index];
+                        } else if (datasetIndex === 1 && index < promedios2.length) {
+                            ramoName = nombresRamos2[index];
+                            valorMostrar = promedios2[index];
+                        } else {
+                            ramoName = "Posición " + (index + 1);
+                            valorMostrar = 0;
+                        }
+                        
+                        console.log("Tooltip - Dataset:" + datasetIndex + ", Index:" + index + ", Ramo:" + ramoName + ", Valor:" + valorMostrar);
+                        
+                        return ramoName + ' - ' + datasetLabel + ': ' + valorMostrar.toFixed(1);
+                    },
+                    title: function(tooltipItems, data) {
+                        var index = tooltipItems[0].index;
+                        return "Posición " + (index + 1);
+                    }
+                }
+            },
+            maintainAspectRatio: false,
+            responsive: true,
+            hover: {
+                mode: 'index',
+                intersect: false
+            }
+        }
+    });
+    
+    console.log("=== GRÁFICO CREADO EXITOSAMENTE ===");
+    
+    return myLineChart;
+}
+
+// Inicializar gráfico cuando la página esté cargada
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("=== DOM CARGADO, INICIALIZANDO GRÁFICO ===");
+    setTimeout(function() {
+        inicializarGraficoComparacion();
+    }, 100);
+});
+
+// Función para actualizar opciones de los selectores
+function actualizarOpciones() {
+    const semestre1 = document.getElementById('semestre1');
+    const semestre2 = document.getElementById('semestre2');
+    const opciones1 = semestre1.options;
+    const opciones2 = semestre2.options;
+    
+    for (let i = 0; i < opciones1.length; i++) {
+        opciones1[i].disabled = false;
+        opciones2[i].disabled = false;
+    }
+    
+    if (semestre1.value) {
+        for (let i = 0; i < opciones2.length; i++) {
+            if (opciones2[i].value === semestre1.value) {
+                opciones2[i].disabled = true;
+            }
+        }
+    }
+    
+    if (semestre2.value) {
+        for (let i = 0; i < opciones1.length; i++) {
+            if (opciones1[i].value === semestre2.value) {
+                opciones1[i].disabled = true;
+            }
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarOpciones();
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 
 # Create your models here.
 
@@ -21,6 +22,29 @@ class Reserva(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class Comentario(models.Model):
+    nombre = models.CharField(max_length=100)
+    email = models.EmailField()
+    telefono = models.CharField(
+        max_length=20,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?\d{8,13}$',
+                message='Ingrese un número de teléfono válido'
+            )
+        ]
+    )
+    mensaje = models.TextField(max_length=200)  # LÍMITE DE 200 CARACTERES
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-fecha_creacion']
+        verbose_name = 'Comentario'
+        verbose_name_plural = 'Comentarios'
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.email}"
 
 class Semestre(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -65,6 +89,15 @@ class Ramo(models.Model):
         else:
             final = parcial
         return round(final, 2)
+
+    # NUEVO: Propiedades para mostrar con punto decimal
+    @property
+    def promedio_parcial_display(self):
+        return f"{self.promedio_parcial:.2f}".replace(',', '.')
+
+    @property
+    def promedio_final_display(self):
+        return f"{self.promedio_final:.2f}".replace(',', '.')
 
     @property # DEFINIR SISTEMA DE ALERTAS DEFCON
     def defcon(self):

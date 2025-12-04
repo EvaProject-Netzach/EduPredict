@@ -15,10 +15,14 @@
             height: 20px;
         }
         #content {
-            background-image: url('{% static "assets/img/fondoLetraAzul.jpg" %}');
-            background-size: cover; /* Cubrir todo el área */
-            background-repeat: no-repeat; /* No repetir la imagen */
-            min-height: 100vh; /* Asegurarse de que ocupe al menos toda la altura de la ventana */
+            background-image: url('{% static "assets/img/fondoLetraAzul.webp" %}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            will-change: transform;
+            transform: translateZ(0);
         }
     </style>
     
@@ -89,7 +93,7 @@
             <div class="modal-header justify-content-center border-0 position-relative"><!-- Flex centrado -->
                 <h5 class="modal-title" id="exampleModalLabel">¿Quieres cerrar la sesión?</h5>
                 <button class="close position-absolute" style="right: 1rem;" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">Selecciona "Cerrar Sesión" si deseas cerrar sesión.</div>
@@ -118,6 +122,10 @@
     <!-- Custom scripts for all pages-->
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Bloque para JavaScript adicional -->
+    {% block extra_js %}
+    {% endblock %}
 
 </body>
 
